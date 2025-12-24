@@ -8,12 +8,6 @@ load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 os.environ["OPENAI_API_KEY"] = GROQ_API_KEY
 
-llm = ChatOpenAI(
-    openai_api_base="https://api.groq.com/openai/v1",
-    openai_api_key= GROQ_API_KEY,
-    model_name="openai/gpt-oss-20b"  # Updated to a valid Groq model
-)
-
 # Define standard prompts for different LinkedIn post styles
 STYLE_PROMPTS = {
     "simple": "Write a simple and straightforward LinkedIn post about {topic}. Keep it concise and easy to understand.",
@@ -25,9 +19,17 @@ STYLE_PROMPTS = {
     "educational": "Write an educational LinkedIn post about {topic}. Explain key concepts, share facts, and provide learning opportunities.",
 }
 
-def generate_linkedin_post(topic, style):
+def generate_linkedin_post(topic, style, temperature=0.7):
     if style not in STYLE_PROMPTS:
         raise ValueError(f"Invalid style. Choose from: {', '.join(STYLE_PROMPTS.keys())}")
+    
+    # Create LLM with specified temperature
+    llm = ChatOpenAI(
+        openai_api_base="https://api.groq.com/openai/v1",
+        openai_api_key=GROQ_API_KEY,
+        model_name="llama2-70b-4096",
+        temperature=temperature
+    )
     
     # Get the standard prompt for the selected style and insert the topic
     prompt = STYLE_PROMPTS[style].format(topic=topic)
@@ -48,16 +50,23 @@ def generate_linkedin_post(topic, style):
 
 # Main execution
 if __name__ == "__main__":
-    topic = input("Enter the topic for your LinkedIn post: ")
+    import streamlit as st
     
-    print("\nAvailable styles:")
-    for key in STYLE_PROMPTS.keys():
-        print(f"- {key}")
+    st.title("LinkedIn Post Generator")
     
-    style = input("Choose a style: ").strip().lower()
+    topic = st.text_input("Enter the topic for your LinkedIn post:")
     
-    try:
-        post = generate_linkedin_post(topic, style)
-        print(f"\nGenerated LinkedIn Post ({style} style):\n{post}")
-    except ValueError as e:
-        print(e)
+    style = st.selectbox("Choose a style:", list(STYLE_PROMPTS.keys()))
+    
+    temperature = st.slider("Temperature (controls creativity/randomness):", min_value=0.0, max_value=2.0, value=0.7, step=0.1)
+    
+    if st.button("Generate Post"):
+        if topic.strip():
+            try:
+                post = generate_linkedin_post(topic, style, temperature)
+                st.subheader(f"Generated LinkedIn Post ({style} style):")
+                st.write(post)
+            except ValueError as e:
+                st.error(str(e))
+        else:
+            st.error("Please enter a topic.")
