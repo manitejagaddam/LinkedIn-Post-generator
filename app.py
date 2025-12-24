@@ -14,37 +14,50 @@ llm = ChatOpenAI(
     model_name="openai/gpt-oss-20b"  # Updated to a valid Groq model
 )
 
-def generate_linkedin_post(topic):
-    # Step 1: Generate a prompt based on the topic
-    prompt_generation_messages = [
+# Define standard prompts for different LinkedIn post styles
+STYLE_PROMPTS = {
+    "simple": "Write a simple and straightforward LinkedIn post about {topic}. Keep it concise and easy to understand.",
+    "creative": "Create a creative and imaginative LinkedIn post about {topic}. Use storytelling, metaphors, and engaging language to make it stand out.",
+    "professional": "Write a professional LinkedIn post about {topic}. Maintain a formal tone, provide valuable insights, and encourage networking or discussion.",
+    "genz": "Write a Gen Z style LinkedIn post about {topic}. Use modern slang, emojis, and a casual, relatable vibe to connect with younger audiences.",
+    "millennial": "Write a millennial style LinkedIn post about {topic}. Incorporate nostalgia, humor, and personal anecdotes to make it authentic and shareable.",
+    "inspirational": "Write an inspirational LinkedIn post about {topic}. Motivate readers with positive messages, quotes, and calls to action.",
+    "educational": "Write an educational LinkedIn post about {topic}. Explain key concepts, share facts, and provide learning opportunities.",
+}
+
+def generate_linkedin_post(topic, style):
+    if style not in STYLE_PROMPTS:
+        raise ValueError(f"Invalid style. Choose from: {', '.join(STYLE_PROMPTS.keys())}")
+    
+    # Get the standard prompt for the selected style and insert the topic
+    prompt = STYLE_PROMPTS[style].format(topic=topic)
+    
+    # Use the LLM to generate the LinkedIn post based on the prompt
+    messages = [
         (
             "system",
-            "You are an expert at creating effective prompts for generating engaging LinkedIn posts. Create a detailed, professional prompt that instructs an AI to write a LinkedIn post about the given topic.",
+            "You are a skilled LinkedIn content creator. Generate a high-quality LinkedIn post based on the provided prompt.",
         ),
-        ("human", f"Create a prompt for generating a LinkedIn post about: {topic}"),
+        ("human", prompt),
     ]
     
-    generated_prompt_response = llm.invoke(prompt_generation_messages)
-    generated_prompt = generated_prompt_response.content.strip()
-    
-    print(f"Generated Prompt: {generated_prompt}\n")
-    
-    # Step 2: Use the generated prompt to create the LinkedIn post
-    post_generation_messages = [
-        (
-            "system",
-            "You are a professional content creator specializing in LinkedIn posts. Write an engaging, professional LinkedIn post based on the provided prompt.",
-        ),
-        ("human", generated_prompt),
-    ]
-    
-    post_response = llm.invoke(post_generation_messages)
-    linkedin_post = post_response.content.strip()
+    response = llm.invoke(messages)
+    linkedin_post = response.content.strip()
     
     return linkedin_post
 
 # Main execution
 if __name__ == "__main__":
     topic = input("Enter the topic for your LinkedIn post: ")
-    post = generate_linkedin_post(topic)
-    print(f"\nGenerated LinkedIn Post:\n{post}")
+    
+    print("\nAvailable styles:")
+    for key in STYLE_PROMPTS.keys():
+        print(f"- {key}")
+    
+    style = input("Choose a style: ").strip().lower()
+    
+    try:
+        post = generate_linkedin_post(topic, style)
+        print(f"\nGenerated LinkedIn Post ({style} style):\n{post}")
+    except ValueError as e:
+        print(e)
