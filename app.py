@@ -27,7 +27,7 @@ def generate_linkedin_post(topic, style, temperature=0.7):
     llm = ChatOpenAI(
         openai_api_base="https://api.groq.com/openai/v1",
         openai_api_key=GROQ_API_KEY,
-        model_name="llama2-70b-4096",
+        model_name="openai/gpt-oss-20b",
         temperature=temperature
     )
     
