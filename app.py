@@ -1,5 +1,6 @@
 import os
 import streamlit as st
+import urllib.parse
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
 
@@ -132,7 +133,13 @@ if generate_btn:
                 st.markdown(f'<div class="post-card">{post_content}</div>', unsafe_allow_html=True)
                 
                 # Action Buttons
-                st.button("📋 Copy to Clipboard", on_click=lambda: st.write("Copying is handled by browser selection in this demo."))
+                col_copy, col_share = st.columns(2)
+                with col_copy:
+                    st.button("📋 Copy to Clipboard", on_click=lambda: st.write("Copying is handled by browser selection in this demo."))
+                with col_share:
+                    encoded_text = urllib.parse.quote(post_content)
+                    share_url = f"https://www.linkedin.com/feed/?shareActive=true&text={encoded_text}"
+                    st.markdown(f'<a href="{share_url}" target="_blank" style="text-decoration: none;"><button style="width: 100%; border-radius: 8px; background: linear-gradient(45deg, #0072b1, #00a0dc); color: white; font-weight: 600; border: none; padding: 10px; transition: all 0.3s ease;">🔗 Share on LinkedIn</button></a>', unsafe_allow_html=True)
             except Exception as e:
                 st.error(f"An error occurred: {e}")
     else:
