@@ -1,4 +1,4 @@
-# ✍️ LinkedIn Post Alchemist
+# ✍️ LinkedIn Post Alchemist - https://linkedin-post-generator-apk.streamlit.app/
 
 **LinkedIn Post Alchemist** is a modern, developer-friendly Streamlit web application that turns raw ideas into **high‑engagement, viral‑ready LinkedIn posts**.
 
